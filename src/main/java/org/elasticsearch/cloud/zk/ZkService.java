@@ -1,6 +1,6 @@
 package org.elasticsearch.cloud.zk;
 
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
@@ -49,17 +49,17 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
   }
 
   @Override
-  protected void doStart() throws ElasticSearchException {
+  protected void doStart() throws ElasticsearchException {
     registerNode();
   }
 
   @Override
-  protected void doStop() throws ElasticSearchException {
+  protected void doStop() throws ElasticsearchException {
     unregisterNode();
   }
 
   @Override
-  protected void doClose() throws ElasticSearchException {
+  protected void doClose() throws ElasticsearchException {
     unregisterNode();
   }
 

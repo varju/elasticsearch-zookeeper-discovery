@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.elasticsearch.Version;
 import org.elasticsearch.cloud.zk.ZkService;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.collect.Lists;
@@ -20,9 +21,11 @@ public class ZkUnicastHostsProvider extends AbstractComponent implements Unicast
   private final TransportService  transportService;
   private final ZkService      zkService;
   private final String      hostname;
+  private final Version version;
 
-  public ZkUnicastHostsProvider(final Settings settings, final TransportService transportService, final ZkService zkService) {
+  public ZkUnicastHostsProvider(final Settings settings, final TransportService transportService, final ZkService zkService, final Version version) {
     super(settings);
+    this.version = version;
     this.hostname = settings.get("cloud.zk.hostname", "");
     this.zkService = zkService;
     this.transportService = transportService;
@@ -45,7 +48,7 @@ public class ZkUnicastHostsProvider extends AbstractComponent implements Unicast
         int i = 0;
         for (TransportAddress address : this.transportService.addressesFromString(entry.getValue())) {
           this.logger.debug("Found node \"{}\" with address {}", entry.getKey(), address);
-          discoNodes.add(new DiscoveryNode("#cloud-" + entry.getKey() + "-" + i++, address));
+          discoNodes.add(new DiscoveryNode("#cloud-" + entry.getKey() + "-" + i++, address, version));
         }
       } catch (Exception e) {
         this.logger.warn("Can't add address {} as valid DiscoveryNode", entry.getValue());
