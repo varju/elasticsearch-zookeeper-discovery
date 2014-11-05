@@ -11,6 +11,5 @@ public class ZkSettingsFilter implements SettingsFilter.Filter {
   public void filter(final ImmutableSettings.Builder settings) {
     settings.remove("zk.path");
     settings.remove("zk.hosts");
-    settings.remove("zk.hostname");
   }
 }

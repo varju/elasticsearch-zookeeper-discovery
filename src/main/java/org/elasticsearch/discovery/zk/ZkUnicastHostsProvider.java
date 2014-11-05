@@ -1,6 +1,5 @@
 package org.elasticsearch.discovery.zk;
 
-import java.net.InetAddress;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -20,13 +19,11 @@ import org.elasticsearch.transport.TransportService;
 public class ZkUnicastHostsProvider extends AbstractComponent implements UnicastHostsProvider {
   private final TransportService  transportService;
   private final ZkService      zkService;
-  private final String      hostname;
   private final Version version;
 
   public ZkUnicastHostsProvider(final Settings settings, final TransportService transportService, final ZkService zkService, final Version version) {
     super(settings);
     this.version = version;
-    this.hostname = settings.get("cloud.zk.hostname", "");
     this.zkService = zkService;
     this.transportService = transportService;
   }
@@ -34,8 +31,7 @@ public class ZkUnicastHostsProvider extends AbstractComponent implements Unicast
   @Override
   public List<DiscoveryNode> buildDynamicNodes() {
     this.logger.info("Building list of dynamic discovery nodes from ZooKeeper");
-    final String myAddress = getMyAddress();
-    this.zkService.setNodeAddress(myAddress);
+    final String myAddress = this.zkService.getNodeAddress();
 
     final List<DiscoveryNode> discoNodes = Lists.newArrayList();
     int clientCount = 0;
@@ -57,25 +53,5 @@ public class ZkUnicastHostsProvider extends AbstractComponent implements Unicast
     this.logger.info("Found {} other nodes via ZooKeeper", clientCount);
 
     return discoNodes;
-  }
-
-  private String getMyAddress() {
-    if (!this.hostname.isEmpty()) {
-      return this.hostname;
-    }
-    this.logger.info("Hostname has not been set - autodetecting my address");
-    String myIpAddress = this.transportService.boundAddress().publishAddress().toString();
-    myIpAddress = myIpAddress.substring(6, myIpAddress.length() - 1);
-
-    String address = null;
-    try {
-      address = InetAddress.getLocalHost().getCanonicalHostName();
-      if (!address.equals("localhost")) {
-        return address + ":" + myIpAddress.split(":")[1];
-      }
-    } catch (Exception e) {
-      this.logger.info("Can't find FQDN, falling back to IP");
-    }
-    return myIpAddress;
   }
 }

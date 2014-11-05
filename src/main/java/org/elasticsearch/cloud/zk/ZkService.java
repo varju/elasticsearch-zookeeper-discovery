@@ -2,12 +2,12 @@ package org.elasticsearch.cloud.zk;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
+import org.elasticsearch.common.component.LifecycleListener;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
-import org.elasticsearch.zookeeper.NodeSet;
-import org.elasticsearch.zookeeper.NodeSetMember;
-import org.elasticsearch.zookeeper.ZKConnector;
+import org.elasticsearch.transport.TransportService;
+import org.elasticsearch.zookeeper.*;
 
 /**
  * This service establishes the actual connection to the ZooKeeper and finds the other nodes of the cluster.
@@ -17,10 +17,11 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
   private final NodeSet<String>  nodes;
   private final String      zkPath;
   private String          nodeAddress;
+  private final TransportService transportService;
   private NodeSetMember      groupMember;
 
   @Inject
-  public ZkService(final Settings settings, final SettingsFilter settingsFilter) {
+  public ZkService(final Settings settings, final SettingsFilter settingsFilter, TransportService transportService) {
     super(settings);
     settingsFilter.addFilter(new ZkSettingsFilter());
 
@@ -38,10 +39,29 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
 
     this.zkPath = settings.get("cloud.zk.path", "/elasticsearch");
     this.nodes = new NodeSet<String>(this.zooConnector, this.zkPath);
+
+    this.transportService = transportService;
+    transportService.addLifecycleListener(new LifecycleListener() {
+      @Override
+      public void afterStart() {
+        try {
+          String myIpAddress = ZkService.this.transportService.boundAddress().publishAddress().toString();
+          ZkService.this.nodeAddress = myIpAddress.replaceFirst("^inet\\[/", "").replaceFirst("\\]$", "");
+          registerNode();
+        } catch (Exception e) {
+          logger.info("Failed to register node with zookeeper", e);
+        }
+      }
+
+      @Override
+      public void beforeStop() {
+        unregisterNode();
+      }
+    });
   }
 
-  public void setNodeAddress(final String myAddress) {
-    this.nodeAddress = myAddress;
+  public String getNodeAddress() {
+    return this.nodeAddress;
   }
 
   public NodeSet<String> getNodes() {
@@ -50,17 +70,14 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
 
   @Override
   protected void doStart() throws ElasticsearchException {
-    registerNode();
   }
 
   @Override
   protected void doStop() throws ElasticsearchException {
-    unregisterNode();
   }
 
   @Override
   protected void doClose() throws ElasticsearchException {
-    unregisterNode();
   }
 
   /**
