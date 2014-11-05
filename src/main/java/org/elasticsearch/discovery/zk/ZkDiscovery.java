@@ -28,8 +28,9 @@ public class ZkDiscovery extends ZenDiscovery {
                      final DiscoverySettings discoverySettings, final ZkService ec2Service) {
     super(settings, clusterName, threadPool, transportService, clusterService, nodeSettingsService, discoveryNodeService, pingService, version, discoverySettings);
 
-    this.logger.info("Setting up ZkDiscovery");
     if (settings.getAsBoolean("cloud.zk.enabled", false)) {
+      this.logger.info("Setting up ZkDiscovery");
+
       final ImmutableList<? extends ZenPing> zenPings = pingService.zenPings();
       UnicastZenPing unicastZenPing = null;
       for (ZenPing zenPing : zenPings) {
@@ -46,6 +47,8 @@ public class ZkDiscovery extends ZenDiscovery {
       else {
         this.logger.warn("failed to apply zk unicast discovery, no unicast ping found");
       }
+    } else {
+      this.logger.info("ZkDiscovery plugin disabled");
     }
   }
 }
