@@ -1,27 +1,21 @@
 package org.elasticsearch.zookeeper;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.*;
 import org.apache.zookeeper.Watcher.Event.EventType;
-import org.apache.zookeeper.ZooKeeper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.Loggers;
 
 /**
  * Stores a set of data in a set of ZooKeeper nodes for later retrieval. Data is only kept as long as the client that set the
  * value is connected.
  */
 public class NodeSet<T> implements Watcher, Iterable<Entry<String, String>> {
-  private static final Logger      logger  = LoggerFactory.getLogger(NodeSet.class);
+  private static final ESLogger logger = Loggers.getLogger(NodeSet.class);
   private final ZooKeeper        zoo;
   private final String        groupPath;
   private final Map<String, String>  nodeMap  = new ConcurrentHashMap<String, String>();

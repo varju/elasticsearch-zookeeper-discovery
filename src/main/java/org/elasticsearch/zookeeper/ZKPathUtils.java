@@ -7,8 +7,8 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.Loggers;
 
 /**
  * Utility class to list information about paths and their children.
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public final class ZKPathUtils {
   private ZKPathUtils() {}
 
-  private static final Logger  logger  = LoggerFactory.getLogger(ZKPathUtils.class);
+  private static final ESLogger logger = Loggers.getLogger(ZKPathUtils.class);
 
   /**
    * Returns a list of direct children for the given path.

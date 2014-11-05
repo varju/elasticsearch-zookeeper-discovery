@@ -1,17 +1,13 @@
 package org.elasticsearch.zookeeper;
 
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.*;
 import org.apache.zookeeper.ZooDefs.Ids;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.Loggers;
 
 public class NodeSetMember implements Watcher {
-  private static final Logger  logger  = LoggerFactory.getLogger(NodeSetMember.class);
+  private static final ESLogger logger = Loggers.getLogger(NodeSetMember.class);
   private String        group;
   private String        nodeName;
   private final String    nodeValue;
