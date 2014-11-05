@@ -13,6 +13,6 @@ Just copy the .zip file on the elasticsearch server should be using the plugin a
 
 An Exmaple how one would call the plugin script:
 
-	/my/elasticsearch/bin/plugin install zkdk -url file:///path/to/plugin/zk-discovery.zip
+  /my/elasticsearch/bin/plugin install zkdk -url file:///path/to/plugin/zk-discovery.zip
 
 The plugin needs to be installed on all nodes of the ES cluster.
