@@ -1,0 +1,20 @@
+<assembly>
+  <id>plugin</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>/</outputDirectory>
+      <useProjectArtifact>true</useProjectArtifact>
+      <scope>compile</scope>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+      <excludes>
+        <exclude>org.elasticsearch:elasticsearch</exclude>
+        <exclude>log4j:log4j</exclude>
+        <exclude>slf4j:slf4j-log4j12</exclude>
+      </excludes>
+    </dependencySet>
+  </dependencySets>
+</assembly>
