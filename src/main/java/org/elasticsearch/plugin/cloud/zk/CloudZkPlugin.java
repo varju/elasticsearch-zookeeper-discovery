@@ -15,38 +15,38 @@ import org.elasticsearch.plugins.AbstractPlugin;
  */
 public class CloudZkPlugin extends AbstractPlugin {
 
-	private final Settings	settings;
+  private final Settings  settings;
 
-	public CloudZkPlugin(final Settings settings) {
-		this.settings = settings;
-	}
+  public CloudZkPlugin(final Settings settings) {
+    this.settings = settings;
+  }
 
-	@Override
-	public String name() {
-		return "cloud-zk";
-	}
+  @Override
+  public String name() {
+    return "cloud-zk";
+  }
 
-	@Override
-	public String description() {
-		return "Cloud ZooKeeper Plugin";
-	}
+  @Override
+  public String description() {
+    return "Cloud ZooKeeper Plugin";
+  }
 
-	@Override
-	public Collection<Class<? extends Module>> modules() {
-		Collection<Class<? extends Module>> modules = Lists.newArrayList();
-		if (this.settings.getAsBoolean("cloud.zk.enabled", false)) {
-			modules.add(ZkModule.class);
-		}
-		return modules;
-	}
+  @Override
+  public Collection<Class<? extends Module>> modules() {
+    Collection<Class<? extends Module>> modules = Lists.newArrayList();
+    if (this.settings.getAsBoolean("cloud.zk.enabled", false)) {
+      modules.add(ZkModule.class);
+    }
+    return modules;
+  }
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public Collection<Class<? extends LifecycleComponent>> services() {
-		Collection<Class<? extends LifecycleComponent>> services = Lists.newArrayList();
-		if (this.settings.getAsBoolean("cloud.zk.enabled", false)) {
-			services.add(ZkService.class);
-		}
-		return services;
-	}
+  @SuppressWarnings("rawtypes")
+  @Override
+  public Collection<Class<? extends LifecycleComponent>> services() {
+    Collection<Class<? extends LifecycleComponent>> services = Lists.newArrayList();
+    if (this.settings.getAsBoolean("cloud.zk.enabled", false)) {
+      services.add(ZkService.class);
+    }
+    return services;
+  }
 }
