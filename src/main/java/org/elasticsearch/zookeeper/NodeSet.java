@@ -1,6 +1,6 @@
 package org.elasticsearch.zookeeper;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,11 +14,11 @@ import org.elasticsearch.common.logging.Loggers;
  * Stores a set of data in a set of ZooKeeper nodes for later retrieval. Data is only kept as long as the client that set the
  * value is connected.
  */
-public class NodeSet<T> implements Watcher, Iterable<Entry<String, String>> {
+public class NodeSet implements Watcher, Iterable<Entry<String, NodeMetadata>> {
   private static final ESLogger logger = Loggers.getLogger(NodeSet.class);
   private final ZooKeeper        zoo;
   private final String        groupPath;
-  private final Map<String, String>  nodeMap  = new ConcurrentHashMap<String, String>();
+  private final Map<String, NodeMetadata>  nodeMap  = new ConcurrentHashMap<String, NodeMetadata>();
 
   public NodeSet(final ZKConnector zoo, final String groupPath) {
     this.zoo = zoo.getZk();
@@ -58,18 +58,14 @@ public class NodeSet<T> implements Watcher, Iterable<Entry<String, String>> {
   }
 
   @Override
-  public Iterator<Entry<String, String>> iterator() {
+  public Iterator<Entry<String, NodeMetadata>> iterator() {
     return this.nodeMap.entrySet().iterator();
   }
 
   /**
    * Fetches data form ZooKeeper and checks what information needs to be updated.
-   *
-   * @throws KeeperException
-   * @throws InterruptedException
-   * @throws UnsupportedEncodingException
    */
-  private synchronized void getNodesFromZoo() throws KeeperException, InterruptedException, UnsupportedEncodingException {
+  private synchronized void getNodesFromZoo() throws KeeperException, InterruptedException, IOException {
     try {
       final Set<String> newState = new HashSet<String>(this.zoo.getChildren(this.groupPath, this));
       final Set<String> toDelete = new HashSet<String>(this.nodeMap.keySet());
@@ -89,9 +85,9 @@ public class NodeSet<T> implements Watcher, Iterable<Entry<String, String>> {
     }
   }
 
-  private void add(final String node) throws KeeperException, InterruptedException, UnsupportedEncodingException {
+  private void add(final String node) throws KeeperException, InterruptedException, IOException {
     final byte[] data = this.zoo.getData(this.groupPath + "/" + node, this, null);
-    this.nodeMap.put(node, new String(data, "UTF-8"));
+    this.nodeMap.put(node, NodeMetadata.fromBytes(data));
   }
 
   private void remove(final String node) {

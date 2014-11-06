@@ -37,8 +37,10 @@ cloud.zk:
   - zookeeper1:2181
   - zookeeper2:2181
   path: /elasticsearch
+  http_port: 9200
 ```
 
 Optional properties:
 
 - `cloud.zk.path` - the zookeeper parent node containing the list of hosts; must already exist. Default: `/elasticsearch`
+- `cloud.zk.http_port` - the externally visible HTTP port.  Default: 9200

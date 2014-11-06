@@ -10,10 +10,10 @@ public class NodeSetMember implements Watcher {
   private static final ESLogger logger = Loggers.getLogger(NodeSetMember.class);
   private String        group;
   private String        nodeName;
-  private final String    nodeValue;
+  private final NodeMetadata nodeValue;
   private final ZKConnector  zooConnector;
 
-  public NodeSetMember(final ZKConnector zooConnector, final String group, final String nodeName, final String value) {
+  public NodeSetMember(final ZKConnector zooConnector, final String group, final String nodeName, final NodeMetadata value) {
     this.zooConnector = zooConnector;
     this.group = group;
     this.nodeName = nodeName;
@@ -44,7 +44,7 @@ public class NodeSetMember implements Watcher {
             this.group, this.nodeName });
       }
 
-      zk.create(this.group + this.nodeName, this.nodeValue.getBytes("UTF-8"), Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+      zk.create(this.group + this.nodeName, this.nodeValue.toBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
       logger.info("Zookeeper: {} - node entry has been written: {}{} = {} ", new Object[] { getConnectionAsString(), this.group,
           this.nodeName, this.nodeValue });
 
