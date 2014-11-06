@@ -16,6 +16,7 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
   private final ZKConnector    zooConnector;
   private final NodeSet nodes;
   private final String      zkPath;
+  private final int httpPort;
   private final TransportService transportService;
   private NodeMetadata nodeMetadata;
   private NodeSetMember      groupMember;
@@ -38,6 +39,7 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
     }
 
     this.zkPath = settings.get("cloud.zk.path", "/elasticsearch");
+    this.httpPort = Integer.valueOf(settings.get("cloud.zk.http_port", "9200"));
     this.nodes = new NodeSet(this.zooConnector, this.zkPath);
 
     this.transportService = transportService;
@@ -50,7 +52,7 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
             .split(":", 2);
           String hostname = addressWithPort[0];
           int transportPort = Integer.valueOf(addressWithPort[1]);
-          ZkService.this.nodeMetadata = new NodeMetadata(hostname, transportPort);
+          ZkService.this.nodeMetadata = new NodeMetadata(hostname, transportPort, ZkService.this.httpPort);
           registerNode();
         } catch (Exception e) {
           logger.info("Failed to register node with zookeeper", e);
