@@ -6,6 +6,8 @@ import org.elasticsearch.common.component.LifecycleListener;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.TransportService;
 import org.elasticsearch.zookeeper.*;
 
@@ -47,11 +49,10 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
       @Override
       public void afterStart() {
         try {
-          String[] addressWithPort = ZkService.this.transportService.boundAddress().publishAddress().toString()
-            .replaceFirst("^inet\\[/", "").replaceFirst("\\]$", "")
-            .split(":", 2);
-          String hostname = addressWithPort[0];
-          int transportPort = Integer.valueOf(addressWithPort[1]);
+          TransportAddress transportAddress = ZkService.this.transportService.boundAddress().publishAddress();
+          InetSocketTransportAddress inetAddress = (InetSocketTransportAddress) transportAddress;
+          String hostname = inetAddress.address().getHostName();
+          int transportPort = inetAddress.address().getPort();
           ZkService.this.nodeMetadata = new NodeMetadata(hostname, transportPort, ZkService.this.httpPort);
           registerNode();
         } catch (Exception e) {
