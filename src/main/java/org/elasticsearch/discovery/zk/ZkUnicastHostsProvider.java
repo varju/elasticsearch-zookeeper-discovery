@@ -12,6 +12,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
 import org.elasticsearch.transport.TransportService;
+import org.elasticsearch.zookeeper.NodeMetadata;
 
 /**
  * Is used to register this node and create a list of available nodes in the cluster.
@@ -31,23 +32,26 @@ public class ZkUnicastHostsProvider extends AbstractComponent implements Unicast
   @Override
   public List<DiscoveryNode> buildDynamicNodes() {
     this.logger.info("Building list of dynamic discovery nodes from ZooKeeper");
-    final String myAddress = this.zkService.getNodeAddress();
+    final NodeMetadata myAddress = this.zkService.getNodeMetadata();
 
     final List<DiscoveryNode> discoNodes = Lists.newArrayList();
     int clientCount = 0;
-    for (Entry<String, String> entry : this.zkService.getNodes()) {
-      if (entry.getValue().equals(myAddress)) {
+    for (Entry<String, NodeMetadata> entry : this.zkService.getNodes()) {
+      NodeMetadata entryValue = entry.getValue();
+      if (entryValue.equals(myAddress)) {
+        this.logger.debug("Skipping myself: node \"{}\" with value {}", entry.getKey(), entryValue);
         continue;
       }
       clientCount++;
       try {
         int i = 0;
-        for (TransportAddress address : this.transportService.addressesFromString(entry.getValue())) {
+        String discoveryAddress = entryValue.getHostname() + ":" + entryValue.getTransportPort();
+        for (TransportAddress address : this.transportService.addressesFromString(discoveryAddress)) {
           this.logger.debug("Found node \"{}\" with address {}", entry.getKey(), address);
           discoNodes.add(new DiscoveryNode("#cloud-" + entry.getKey() + "-" + i++, address, version));
         }
       } catch (Exception e) {
-        this.logger.warn("Can't add address {} as valid DiscoveryNode", entry.getValue());
+        this.logger.warn("Can't add address {} as valid DiscoveryNode", entryValue);
       }
     }
     this.logger.info("Found {} other nodes via ZooKeeper", clientCount);

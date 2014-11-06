@@ -14,10 +14,10 @@ import org.elasticsearch.zookeeper.*;
  */
 public class ZkService extends AbstractLifecycleComponent<ZkService> {
   private final ZKConnector    zooConnector;
-  private final NodeSet<String>  nodes;
+  private final NodeSet nodes;
   private final String      zkPath;
-  private String          nodeAddress;
   private final TransportService transportService;
+  private NodeMetadata nodeMetadata;
   private NodeSetMember      groupMember;
 
   @Inject
@@ -38,15 +38,19 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
     }
 
     this.zkPath = settings.get("cloud.zk.path", "/elasticsearch");
-    this.nodes = new NodeSet<String>(this.zooConnector, this.zkPath);
+    this.nodes = new NodeSet(this.zooConnector, this.zkPath);
 
     this.transportService = transportService;
     transportService.addLifecycleListener(new LifecycleListener() {
       @Override
       public void afterStart() {
         try {
-          String myIpAddress = ZkService.this.transportService.boundAddress().publishAddress().toString();
-          ZkService.this.nodeAddress = myIpAddress.replaceFirst("^inet\\[/", "").replaceFirst("\\]$", "");
+          String[] addressWithPort = ZkService.this.transportService.boundAddress().publishAddress().toString()
+            .replaceFirst("^inet\\[/", "").replaceFirst("\\]$", "")
+            .split(":", 2);
+          String hostname = addressWithPort[0];
+          int transportPort = Integer.valueOf(addressWithPort[1]);
+          ZkService.this.nodeMetadata = new NodeMetadata(hostname, transportPort);
           registerNode();
         } catch (Exception e) {
           logger.info("Failed to register node with zookeeper", e);
@@ -60,11 +64,11 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
     });
   }
 
-  public String getNodeAddress() {
-    return this.nodeAddress;
+  public NodeMetadata getNodeMetadata() {
+    return this.nodeMetadata;
   }
 
-  public NodeSet<String> getNodes() {
+  public NodeSet getNodes() {
     return this.nodes;
   }
 
@@ -84,7 +88,7 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
    * Registers a node at a specified ZooKeeper path, so that other nodes can find this node.
    */
   private void registerNode() {
-    if (this.nodeAddress == null) {
+    if (this.nodeMetadata == null) {
       this.logger.warn("Can't register with ZooKeeper, as I don't know my own address yet");
       return;
     }
@@ -92,9 +96,9 @@ public class ZkService extends AbstractLifecycleComponent<ZkService> {
       this.logger.warn("Already registered with ZooKeeper, skipping registration");
       return;
     }
-    this.groupMember = new NodeSetMember(this.zooConnector, this.zkPath, getZKNodeName(), this.nodeAddress);
+    this.groupMember = new NodeSetMember(this.zooConnector, this.zkPath, getZKNodeName(), this.nodeMetadata);
     this.groupMember.registerNode();
-    this.logger.info("Registered with ZooKeeper under node {} with address {}", getZKNodeName(), this.nodeAddress);
+    this.logger.info("Registered with ZooKeeper under node {} with address {}", getZKNodeName(), this.nodeMetadata);
   }
 
   private void unregisterNode() {
