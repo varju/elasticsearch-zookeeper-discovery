@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <name>ElasticSearch ZooKeeper Conenctor</name>
+  <name>Elasticsearch ZooKeeper Connector</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.pyxzl</groupId>
   <artifactId>elasticsearch-zookeeper-discovery</artifactId>
   <packaging>jar</packaging>
-  <description>Zookeeper Discovery for ElasticSearch</description>
+  <description>Zookeeper Discovery for Elasticsearch</description>
   <inceptionYear>2013</inceptionYear>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-     <version.elasticsearch>1.3.4</version.elasticsearch>
+     <version.elasticsearch>1.4.0</version.elasticsearch>
     <version.apache.zookeeper>3.4.6</version.apache.zookeeper>
 
     <version.findbugs>2.5.2</version.findbugs>
