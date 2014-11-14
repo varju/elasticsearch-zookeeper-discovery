@@ -10,6 +10,7 @@ import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.discovery.DiscoverySettings;
 import org.elasticsearch.discovery.zen.ZenDiscovery;
+import org.elasticsearch.discovery.zen.elect.ElectMasterService;
 import org.elasticsearch.discovery.zen.ping.ZenPing;
 import org.elasticsearch.discovery.zen.ping.ZenPingService;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastZenPing;
@@ -24,9 +25,9 @@ public class ZkDiscovery extends ZenDiscovery {
   @Inject
   public ZkDiscovery(final Settings settings, final ClusterName clusterName, final ThreadPool threadPool,
                      final TransportService transportService, final ClusterService clusterService, final NodeSettingsService nodeSettingsService,
-                     final DiscoveryNodeService discoveryNodeService, final ZenPingService pingService, final Version version,
-                     final DiscoverySettings discoverySettings, final ZkService ec2Service) {
-    super(settings, clusterName, threadPool, transportService, clusterService, nodeSettingsService, discoveryNodeService, pingService, version, discoverySettings);
+                     final DiscoveryNodeService discoveryNodeService, final ZenPingService pingService, final ElectMasterService electMasterService,
+                     final Version version, final DiscoverySettings discoverySettings, final ZkService ec2Service) {
+    super(settings, clusterName, threadPool, transportService, clusterService, nodeSettingsService, discoveryNodeService, pingService, electMasterService, discoverySettings);
 
     if (settings.getAsBoolean("cloud.zk.enabled", false)) {
       this.logger.info("Setting up ZkDiscovery");

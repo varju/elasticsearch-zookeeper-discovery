@@ -5,6 +5,8 @@ Elasticsearch-Zookeeper-Discovery
 
 A discovery module for Elasticsearch that allows nodes to find each other via communication over a Zookeeper cluster. Of course you need a running ZK server to get this working.
 
+Requires Elasticsearch 1.4 or higher
+
 Building
 --------
 
